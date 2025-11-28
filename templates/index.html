@@ -710,7 +710,20 @@
 
                 <!-- Command Preview -->
                 <div class="p-4 bg-dark border-top border-secondary">
-                    <label class="text-white-50 small mb-2 text-uppercase fw-bold">Aperçu de la commande</label>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="text-white-50 small text-uppercase fw-bold">Aperçu de la commande</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="form-check form-switch text-white-50 small me-3 mb-0">
+                                <input class="form-check-input" type="checkbox" id="showPreviewPassword"
+                                    onchange="updatePreview()">
+                                <label class="form-check-label" for="showPreviewPassword">Afficher les mots de
+                                    passe</label>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="copyPreview()">
+                                <i class="fas fa-copy me-1"></i> Copier
+                            </button>
+                        </div>
+                    </div>
                     <div class="command-preview-box" id="commandPreview">
                         imapsync ...
                     </div>
@@ -958,6 +971,7 @@
             }
             let cmd = "imapsync";
             const fd = new FormData(form);
+            const showPass = document.getElementById('showPreviewPassword').checked;
 
             // Helper to add value flags
             const add = (k, v) => {
@@ -981,7 +995,11 @@
             add('host1', fd.get('host1'));
             add('port1', fd.get('port1'));
             add('user1', fd.get('user1'));
-            if (fd.get('password1')) cmd += ' --password1 ****';
+
+            if (fd.get('password1')) {
+                cmd += ` --password1 ${showPass ? `"${fd.get('password1')}"` : '****'}`;
+            }
+
             if (fd.get('passfile1').name) cmd += ' --passfile1 <file>';
             addB('ssl1');
             add('authmech1', fd.get('authmech1'));
@@ -992,7 +1010,11 @@
             add('host2', fd.get('host2'));
             add('port2', fd.get('port2'));
             add('user2', fd.get('user2'));
-            if (fd.get('password2')) cmd += ' --password2 ****';
+
+            if (fd.get('password2')) {
+                cmd += ` --password2 ${showPass ? `"${fd.get('password2')}"` : '****'}`;
+            }
+
             if (fd.get('passfile2').name) cmd += ' --passfile2 <file>';
             addB('ssl2');
             add('authmech2', fd.get('authmech2'));
@@ -1038,6 +1060,50 @@
 
             preview.textContent = cmd;
         }
+
+        function copyPreview() {
+            const text = document.getElementById('commandPreview').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('button[onclick="copyPreview()"]');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check me-1"></i> Copié !';
+                btn.classList.remove('btn-outline-light');
+                btn.classList.add('btn-success');
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-light');
+                }, 2000);
+            }).catch(err => {
+                console.error('Erreur lors de la copie:', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    const btn = document.querySelector('button[onclick="copyPreview()"]');
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check me-1"></i> Copié !';
+                    btn.classList.remove('btn-outline-light');
+                    btn.classList.add('btn-success');
+
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.classList.remove('btn-success');
+                        btn.classList.add('btn-outline-light');
+                    }, 2000);
+                } catch (err) {
+                    alert('Impossible de copier la commande');
+                }
+                document.body.removeChild(textArea);
+            });
+        }
+
 
         form.addEventListener('change', updatePreview);
         form.addEventListener('input', updatePreview);
