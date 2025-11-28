@@ -1,61 +1,1048 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mail Migration Tool</title>
+    <title>Web IMAP Sync | Ultimate Migration Tool</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body>
-    <div class="container mt-5">
-        <div class="card shadow-lg">
-            <div class="card-header text-center text-white bg-success">
-                <h3>Outil de Migration d'Emails</h3>
+    <div class="container-fluid-custom">
+        <form id="syncForm" action="{{ url_for('migrate') }}" method="post" enctype="multipart/form-data">
+
+            <div class="main-card">
+                <!-- Header -->
+                <div class="card-header-custom">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-primary">
+                            <i class="fas fa-sync-alt fa-lg"></i>
+                        </div>
+                        <div>
+                            <div class="app-title">Web IMAP Sync</div>
+                            <div class="text-muted small">Plateforme de migration universelle</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="mode-switch-container">
+                            <button type="button" class="mode-switch-btn active" id="btn-mode-single"
+                                onclick="setMode('single')">
+                                <i class="fas fa-user me-2"></i>Unique
+                            </button>
+                            <button type="button" class="mode-switch-btn" id="btn-mode-batch"
+                                onclick="setMode('batch')">
+                                <i class="fas fa-layer-group me-2"></i>Batch (CSV)
+                            </button>
+                        </div>
+                        <input type="hidden" name="mode" id="mode_input" value="single">
+                        <span class="badge-pro">v3.5 Ultimate</span>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <ul class="nav nav-tabs nav-tabs-custom" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link nav-link-custom active" id="connexion-tab" data-bs-toggle="tab"
+                            data-bs-target="#connexion" type="button" role="tab" aria-controls="connexion"
+                            aria-selected="true">Connexion</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link nav-link-custom" id="dossiers-tab" data-bs-toggle="tab"
+                            data-bs-target="#dossiers" type="button" role="tab" aria-controls="dossiers"
+                            aria-selected="false">Dossiers</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link nav-link-custom" id="filtres-tab" data-bs-toggle="tab"
+                            data-bs-target="#filtres" type="button" role="tab" aria-controls="filtres"
+                            aria-selected="false">Filtres & Règles</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link nav-link-custom" id="performance-tab" data-bs-toggle="tab"
+                            data-bs-target="#performance" type="button" role="tab" aria-controls="performance"
+                            aria-selected="false">Performance</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link nav-link-custom" id="advanced-tab" data-bs-toggle="tab"
+                            data-bs-target="#advanced" type="button" role="tab" aria-controls="advanced"
+                            aria-selected="false">Avancé</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link nav-link-custom text-danger" id="danger-tab" data-bs-toggle="tab"
+                            data-bs-target="#danger" type="button" role="tab" aria-controls="danger"
+                            aria-selected="false">Zone Danger</button>
+                    </li>
+                </ul>
+
+                <!-- Content -->
+                <div class="p-4">
+                    <div class="tab-content">
+
+                        <!-- TAB: CONNEXION -->
+                        <div class="tab-pane fade show active" id="connexion">
+
+                            <!-- Single Mode -->
+                            <div id="single_mode_content">
+                                <div class="row g-4">
+                                    <div class="col-12">
+                                        <div
+                                            class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3 border border-dashed">
+                                            <i class="fas fa-magic text-primary"></i>
+                                            <span class="fw-bold text-muted">Pré-configuration :</span>
+                                            <select
+                                                class="form-select w-auto border-0 bg-transparent fw-bold text-primary"
+                                                id="preset_selector" style="box-shadow: none;">
+                                                <option value="">Sélectionner un fournisseur...</option>
+                                                <option value="gmail">Gmail ➔ Gmail</option>
+                                                <option value="office365">Office 365 ➔ Office 365</option>
+                                                <option value="exchange">Exchange ➔ Exchange</option>
+                                                <option value="g_to_o">Gmail ➔ Office 365</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="section-card">
+                                            <div class="section-title source">
+                                                <i class="fas fa-server"></i> Serveur Source (Host1)
+                                            </div>
+
+                                            <div class="row g-3">
+                                                <div class="col-md-8">
+                                                    <label class="form-label">Hôte IMAP <i
+                                                            class="fas fa-question-circle help-icon"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Adresse du serveur IMAP (ex: imap.gmail.com, outlook.office365.com). Laissez vide pour auto-détection."></i></label>
+                                                    <input type="text" class="form-control" name="host1" id="host1"
+                                                        placeholder="imap.source.com (auto-détection si vide)"
+                                                        value="{{ form_data.get('host1', '') if form_data else '' }}">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Port <i
+                                                            class="fas fa-question-circle help-icon"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Port IMAP (993 pour SSL, 143 pour non-sécurisé)"></i></label>
+                                                    <input type="number" class="form-control" name="port1" id="port1"
+                                                        value="{{ form_data.get('port1', '993') if form_data else '993' }}">
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label">Email / Utilisateur <i
+                                                            class="fas fa-question-circle help-icon"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Nom d'utilisateur complet (souvent l'adresse email)"></i></label>
+                                                    <input type="text" class="form-control" name="user1" id="user1"
+                                                        placeholder="user@source.com"
+                                                        value="{{ form_data.get('user1', '') if form_data else '' }}"
+                                                        required>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label">Mot de passe <i
+                                                            class="fas fa-question-circle help-icon"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Mot de passe du compte ou mot de passe d'application"></i></label>
+                                                    <div class="input-group">
+                                                        <input type="password" class="form-control" name="password1"
+                                                            id="password1"
+                                                            value="{{ form_data.get('password1', '') if form_data else '' }}">
+                                                        <button class="input-group-text bg-white border-start-0"
+                                                            type="button" onclick="togglePassword('password1', this)"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Afficher/Masquer le mot de passe">
+                                                            <i class="fas fa-eye" id="password1-icon"></i>
+                                                        </button>
+                                                        <label class="input-group-text bg-white" for="passfile1"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Uploader un fichier contenant le mot de passe"><i
+                                                                class="fas fa-file-upload"></i></label>
+                                                        <input type="file" class="form-control d-none" id="passfile1"
+                                                            name="passfile1">
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    class="col-12 d-flex justify-content-between align-items-center mt-2">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input" name="ssl1"
+                                                            id="ssl1" {% if form_data is none or form_data.get('ssl1')
+                                                            %}checked{% endif %}>
+                                                        <label class="form-check-label" for="ssl1">Connexion Sécurisée
+                                                            (SSL/TLS)</label>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Auth Accordion -->
+                                                <div class="col-12">
+                                                    <div class="accordion accordion-flush" id="auth1">
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header">
+                                                                <button class="accordion-button collapsed" type="button"
+                                                                    data-bs-toggle="collapse" data-bs-target="#cAuth1">
+                                                                    <i class="fas fa-key me-2"></i> Authentification
+                                                                    Avancée (OAuth, Proxy)
+                                                                </button>
+                                                            </h2>
+                                                            <div id="cAuth1" class="accordion-collapse collapse">
+                                                                <div class="accordion-body">
+                                                                    <div class="row g-2">
+                                                                        <div class="col-6">
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm"
+                                                                                name="authmech1"
+                                                                                placeholder="Auth Mech (XOAUTH2)"
+                                                                                value="{{ form_data.get('authmech1', '') if form_data else '' }}">
+                                                                        </div>
+                                                                        <div class="col-6">
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm"
+                                                                                name="authuser1"
+                                                                                placeholder="Auth User (Proxy)"
+                                                                                value="{{ form_data.get('authuser1', '') if form_data else '' }}">
+                                                                        </div>
+                                                                        <div class="col-12">
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm"
+                                                                                name="oauthaccesstoken1"
+                                                                                placeholder="OAuth Access Token"
+                                                                                value="{{ form_data.get('oauthaccesstoken1', '') if form_data else '' }}">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <div class="section-card">
+                                            <div class="section-title dest">
+                                                <i class="fas fa-hdd"></i> Serveur Destination (Host2)
+                                            </div>
+
+                                            <div class="row g-3">
+                                                <div class="col-md-8">
+                                                    <label class="form-label">Hôte IMAP <i
+                                                            class="fas fa-question-circle help-icon"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Adresse du serveur IMAP de destination. Laissez vide pour auto-détection."></i></label>
+                                                    <input type="text" class="form-control" name="host2" id="host2"
+                                                        placeholder="imap.dest.com (auto-détection si vide)"
+                                                        value="{{ form_data.get('host2', '') if form_data else '' }}">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Port <i
+                                                            class="fas fa-question-circle help-icon"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Port IMAP (993 pour SSL)"></i></label>
+                                                    <input type="number" class="form-control" name="port2" id="port2"
+                                                        value="{{ form_data.get('port2', '993') if form_data else '993' }}">
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label">Email / Utilisateur <i
+                                                            class="fas fa-question-circle help-icon"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Compte de destination"></i></label>
+                                                    <input type="text" class="form-control" name="user2" id="user2"
+                                                        placeholder="user@dest.com"
+                                                        value="{{ form_data.get('user2', '') if form_data else '' }}"
+                                                        required>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label">Mot de passe <i
+                                                            class="fas fa-question-circle help-icon"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Mot de passe du compte destination"></i></label>
+                                                    <div class="input-group">
+                                                        <input type="password" class="form-control" name="password2"
+                                                            id="password2"
+                                                            value="{{ form_data.get('password2', '') if form_data else '' }}">
+                                                        <button class="input-group-text bg-white border-start-0"
+                                                            type="button" onclick="togglePassword('password2', this)"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Afficher/Masquer le mot de passe">
+                                                            <i class="fas fa-eye" id="password2-icon"></i>
+                                                        </button>
+                                                        <label class="input-group-text bg-white" for="passfile2"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Uploader un fichier contenant le mot de passe"><i
+                                                                class="fas fa-file-upload"></i></label>
+                                                        <input type="file" class="form-control d-none" id="passfile2"
+                                                            name="passfile2">
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    class="col-12 d-flex justify-content-between align-items-center mt-2">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input" name="ssl2"
+                                                            id="ssl2" {% if form_data is none or form_data.get('ssl2')
+                                                            %}checked{% endif %}>
+                                                        <label class="form-check-label" for="ssl2">Connexion Sécurisée
+                                                            (SSL/TLS)</label>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Auth Accordion -->
+                                                <div class="col-12">
+                                                    <div class="accordion accordion-flush" id="auth2">
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header">
+                                                                <button class="accordion-button collapsed" type="button"
+                                                                    data-bs-toggle="collapse" data-bs-target="#cAuth2">
+                                                                    <i class="fas fa-key me-2"></i> Authentification
+                                                                    Avancée (OAuth, Proxy)
+                                                                </button>
+                                                            </h2>
+                                                            <div id="cAuth2" class="accordion-collapse collapse">
+                                                                <div class="accordion-body">
+                                                                    <div class="row g-2">
+                                                                        <div class="col-6">
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm"
+                                                                                name="authmech2"
+                                                                                placeholder="Auth Mech (XOAUTH2)"
+                                                                                value="{{ form_data.get('authmech2', '') if form_data else '' }}">
+                                                                        </div>
+                                                                        <div class="col-6">
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm"
+                                                                                name="authuser2"
+                                                                                placeholder="Auth User (Proxy)"
+                                                                                value="{{ form_data.get('authuser2', '') if form_data else '' }}">
+                                                                        </div>
+                                                                        <div class="col-12">
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm"
+                                                                                name="oauthaccesstoken2"
+                                                                                placeholder="OAuth Access Token"
+                                                                                value="{{ form_data.get('oauthaccesstoken2', '') if form_data else '' }}">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 text-center">
+                                        <button type="button" class="btn btn-outline-primary px-4"
+                                            id="testConnectionBtn">
+                                            <i class="fas fa-plug"></i> Tester la connexion
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Batch Mode -->
+                            <div id="batch_mode_content" style="display: none;">
+                                <div class="row justify-content-center">
+                                    <div class="col-lg-8">
+                                        <div class="section-card text-center py-5">
+                                            <div class="mb-4 text-primary">
+                                                <i class="fas fa-file-csv fa-4x"></i>
+                                            </div>
+                                            <h4 class="mb-3">Migration par Lots (CSV)</h4>
+                                            <p class="text-muted mb-4">
+                                                Importez un fichier CSV contenant la liste des comptes à migrer.<br>
+                                                Les paramètres globaux (dossiers, filtres) s'appliqueront à tous.
+                                            </p>
+
+                                            <div class="mb-4 d-inline-block text-start w-75">
+                                                <label class="form-label">Fichier CSV</label>
+                                                <input type="file" class="form-control" name="batch_csv" accept=".csv">
+                                            </div>
+
+                                            <div>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                    onclick="downloadSampleCSV()">
+                                                    <i class="fas fa-download"></i> Télécharger le modèle CSV
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- TAB: DOSSIERS -->
+                        <div class="tab-pane fade" id="dossiers">
+                            <div class="row g-4">
+                                <div class="col-lg-6">
+                                    <div class="section-card">
+                                        <div class="section-title"><i class="fas fa-folder-open"></i> Sélection</div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Dossiers spécifiques <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Liste de dossiers à synchroniser, séparés par des virgules. Si vide, tout est synchronisé."></i></label>
+                                            <input type="text" class="form-control" name="folder"
+                                                placeholder="INBOX, Sent..."
+                                                value="{{ form_data.get('folder', '') if form_data else '' }}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Pattern d'inclusion (Regex) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Expression régulière pour inclure uniquement certains dossiers (ex: ^INBOX.*)"></i></label>
+                                            <input type="text" class="form-control" name="include"
+                                                placeholder="^INBOX.*"
+                                                value="{{ form_data.get('include', '') if form_data else '' }}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Pattern d'exclusion (Regex) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Expression régulière pour exclure des dossiers (ex: Trash|Junk|Spam)"></i></label>
+                                            <input type="text" class="form-control" name="exclude"
+                                                placeholder="Trash|Junk|Spam"
+                                                value="{{ form_data.get('exclude', '') if form_data else '' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="section-card">
+                                        <div class="section-title"><i class="fas fa-sitemap"></i> Structure & Mapping
+                                        </div>
+                                        <div class="form-check form-switch mb-3">
+                                            <input type="checkbox" class="form-check-input" name="automap" {% if
+                                                form_data is none or form_data.get('automap') %}checked{% endif %}>
+                                            <label class="form-check-label">Automap (Détection auto) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Tente de faire correspondre automatiquement les dossiers spéciaux (Sent -> Sent Items, etc.)"></i></label>
+                                        </div>
+                                        <div class="form-check form-switch mb-3">
+                                            <input type="checkbox" class="form-check-input" name="skipemptyfolders" {%
+                                                if form_data and form_data.get('skipemptyfolders') %}checked{% endif %}>
+                                            <label class="form-check-label">Ignorer les dossiers vides <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Ne crée pas les dossiers qui ne contiennent aucun message"></i></label>
+                                        </div>
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <label class="form-label">Préfixe Source <i
+                                                        class="fas fa-question-circle help-icon"
+                                                        data-bs-toggle="tooltip"
+                                                        title="Supprimer ce préfixe des dossiers source (ex: INBOX.)"></i></label>
+                                                <input type="text" class="form-control" name="prefix1"
+                                                    placeholder="INBOX."
+                                                    value="{{ form_data.get('prefix1', '') if form_data else '' }}">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label">Préfixe Dest <i
+                                                        class="fas fa-question-circle help-icon"
+                                                        data-bs-toggle="tooltip"
+                                                        title="Ajouter ce préfixe aux dossiers destination"></i></label>
+                                                <input type="text" class="form-control" name="prefix2" placeholder=""
+                                                    value="{{ form_data.get('prefix2', '') if form_data else '' }}">
+                                            </div>
+                                        </div>
+                                        <div class="form-check form-switch mb-3">
+                                            <input type="checkbox" class="form-check-input" name="folderrec" {% if
+                                                form_data is none or form_data.get('folderrec') %}checked{% endif %}>
+                                            <label class="form-check-label">Récursif (Sous-dossiers) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Synchroniser également les sous-dossiers"></i></label>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Mapping Manuel (f1f2) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Correspondance explicite : DossierSource=DossierDest"></i></label>
+                                            placeholder="INBOX.Sent=Sent Items" value="{{ form_data.get('f1f2', '') if
+                                            form_data else '' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: FILTRES -->
+                        <div class="tab-pane fade" id="filtres">
+                            <div class="row g-4">
+                                <div class="col-lg-4">
+                                    <div class="section-card">
+                                        <div class="section-title"><i class="fas fa-calendar-alt"></i> Temps</div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Age Max (Jours) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Ignorer les messages plus vieux que X jours"></i></label>
+                                            <input type="number" class="form-control" name="maxage"
+                                                value="{{ form_data.get('maxage', '') if form_data else '' }}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Age Min (Jours) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Ignorer les messages plus récents que X jours"></i></label>
+                                            <input type="number" class="form-control" name="minage"
+                                                value="{{ form_data.get('minage', '') if form_data else '' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="section-card">
+                                        <div class="section-title"><i class="fas fa-weight-hanging"></i> Taille &
+                                            Contenu</div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Taille Max (Bytes) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Ignorer les messages plus gros que cette taille"></i></label>
+                                            <input type="number" class="form-control" name="maxsize"
+                                                value="{{ form_data.get('maxsize', '') if form_data else '' }}">
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" class="form-check-input" name="skipmess" {% if
+                                                form_data and form_data.get('skipmess') %}checked{% endif %}>
+                                            <label class="form-check-label">Skip Messages (Meta only) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Ne synchronise que la structure des dossiers, pas les messages"></i></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="section-card">
+                                        <div class="section-title"><i class="fas fa-search"></i> Recherche IMAP</div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Critère Search <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Critère de recherche IMAP brut (ex: UNSEEN, FROM 'user', SUBJECT 'test')"></i></label>
+                                            placeholder="UNSEEN FROM 'boss'" value="{{ form_data.get('search', '') if
+                                            form_data else '' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: PERFORMANCE -->
+                        <div class="tab-pane fade" id="performance">
+                            <div class="row g-4">
+                                <div class="col-lg-6">
+                                    <div class="section-card">
+                                        <div class="section-title"><i class="fas fa-tachometer-alt"></i> Vitesse</div>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Messages / sec <i
+                                                        class="fas fa-question-circle help-icon"
+                                                        data-bs-toggle="tooltip"
+                                                        title="Limite le nombre de messages transférés par seconde (ex: 5)"></i></label>
+                                                <input type="number" class="form-control" name="maxmessagespersecond"
+                                                    value="{{ form_data.get('maxmessagespersecond', '') if form_data else '' }}">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Bytes / sec <i
+                                                        class="fas fa-question-circle help-icon"
+                                                        data-bs-toggle="tooltip"
+                                                        title="Limite la bande passante utilisée (en octets/seconde)"></i></label>
+                                                <input type="number" class="form-control" name="maxbytespersecond"
+                                                    value="{{ form_data.get('maxbytespersecond', '') if form_data else '' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="section-card">
+                                        <div class="section-title"><i class="fas fa-microchip"></i> Optimisation</div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input type="checkbox" class="form-check-input" name="usecache" {% if
+                                                form_data is none or form_data.get('usecache') %}checked{% endif %}>
+                                            <label class="form-check-label">Utiliser le cache local <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Accélère les synchronisations suivantes en mémorisant les messages déjà vus"></i></label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input type="checkbox" class="form-check-input" name="useuid" {% if
+                                                form_data and form_data.get('useuid') %}checked{% endif %}>
+                                            <label class="form-check-label">Optimisation UID <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Utilise les UID IMAP pour identifier les messages (recommandé)"></i></label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" class="form-check-input" name="nofoldersizes" {% if
+                                                form_data and form_data.get('nofoldersizes') %}checked{% endif %}>
+                                            <label class="form-check-label">Ne pas calculer la taille des
+                                                dossiers <i class="fas fa-question-circle help-icon"
+                                                    data-bs-toggle="tooltip"
+                                                    title="Peut accélérer le démarrage sur les très gros comptes"></i></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: AVANCÉ -->
+                        <div class="tab-pane fade" id="advanced">
+                            <div class="row g-4">
+                                <div class="col-lg-4">
+                                    <div class="section-card">
+                                        <div class="section-title">Timeouts</div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Timeout Source (s) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Temps d'attente max pour le serveur source"></i></label>
+                                            <input type="number" class="form-control" name="timeout1"
+                                                value="{{ form_data.get('timeout1', '120') if form_data else '120' }}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Timeout Dest (s) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Temps d'attente max pour le serveur destination"></i></label>
+                                            <input type="number" class="form-control" name="timeout2"
+                                                value="{{ form_data.get('timeout2', '120') if form_data else '120' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="section-card">
+                                        <div class="section-title">Sync Flags & Labels</div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input type="checkbox" class="form-check-input" name="synclabels" {% if
+                                                form_data and form_data.get('synclabels') %}checked{% endif %}>
+                                            <label class="form-check-label">Sync Labels (Gmail) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Synchroniser les libellés Gmail comme des dossiers"></i></label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input type="checkbox" class="form-check-input" name="syncacls" {% if
+                                                form_data and form_data.get('syncacls') %}checked{% endif %}>
+                                            <label class="form-check-label">Sync ACLs <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Synchroniser les permissions de partage (Access Control Lists)"></i></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="section-card">
+                                        <div class="section-title">Logs</div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Fichier Log <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Nom du fichier de log sur le serveur"></i></label>
+                                            placeholder="imapsync.log" value="{{ form_data.get('logfile', '') if
+                                            form_data else '' }}">
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" class="form-check-input" name="debug" {% if form_data
+                                                and form_data.get('debug') %}checked{% endif %}>
+                                            <label class="form-check-label">Mode Debug <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="Affiche beaucoup plus de détails techniques"></i></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: DANGER -->
+                        <div class="tab-pane fade" id="danger">
+                            <div class="alert alert-danger border-0 d-flex align-items-center mb-4">
+                                <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                                <div>
+                                    <strong>Attention :</strong> Les options ci-dessous peuvent supprimer définitivement
+                                    des données.
+                                </div>
+                            </div>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="section-card border-danger">
+                                        <div class="section-title text-danger">Suppression Source</div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" name="delete1" id="delete1"
+                                                {% if form_data and form_data.get('delete1') %}checked{% endif %}>
+                                            <label class="form-check-label fw-bold" for="delete1">Supprimer les messages
+                                                après transfert <i class="fas fa-question-circle help-icon"
+                                                    data-bs-toggle="tooltip"
+                                                    title="DANGER: Supprime les messages du serveur SOURCE une fois transférés !"></i></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="section-card border-danger">
+                                        <div class="section-title text-danger">Suppression Destination</div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" name="delete2" id="delete2"
+                                                {% if form_data and form_data.get('delete2') %}checked{% endif %}>
+                                            <label class="form-check-label fw-bold" for="delete2">Mode Miroir (Supprimer
+                                                ce qui n'est pas sur la source) <i
+                                                    class="fas fa-question-circle help-icon" data-bs-toggle="tooltip"
+                                                    title="DANGER: Supprime tout message sur la DESTINATION qui n'existe pas sur la source."></i></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Footer / Actions -->
+                <div class="p-4 bg-light border-top d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="dry" id="dry" {% if form_data is none
+                                or form_data.get('dry') %}checked{% endif %}>
+                            <label class="form-check-label fw-bold text-warning" for="dry">Simulation (Dry Run)</label>
+                        </div>
+                        <div class="vr"></div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="background_mode" id="background_mode"
+                                {% if form_data and form_data.get('background_mode') %}checked{% endif %}>
+                            <label class="form-check-label fw-bold text-secondary" for="background_mode">
+                                <i class="fas fa-ghost me-1"></i>Mode Arrière-plan
+                            </label>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 align-items-center">
+                        <a href="{{ url_for('track') }}" class="text-muted text-decoration-none small me-2">
+                            <i class="fas fa-search me-1"></i>Suivre une tâche
+                        </a>
+                        <a href="{{ url_for('clear_config') }}" class="text-danger text-decoration-none small me-2">
+                            <i class="fas fa-trash-alt me-1"></i>Effacer la configuration
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            <i class="fas fa-rocket"></i> Lancer la Synchronisation
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Command Preview -->
+                <div class="p-4 bg-dark border-top border-secondary">
+                    <label class="text-white-50 small mb-2 text-uppercase fw-bold">Aperçu de la commande</label>
+                    <div class="command-preview-box" id="commandPreview">
+                        imapsync ...
+                    </div>
+                </div>
+
             </div>
-            <div class="card-body">
-                <form action="{{ url_for('migrate') }}" method="post">
-                    <div class="row">
-                        <!-- Colonne source -->
-                        <div class="col-md-6">
-                            <h5>Serveur Source</h5>
-                            <div class="mb-3">
-                                <label for="source_server" class="form-label">Serveur IMAP</label>
-                                <input type="text" id="source_server" name="source_server" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="source_user" class="form-label">Utilisateur</label>
-                                <input type="text" id="source_user" name="source_user" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="source_pass" class="form-label">Mot de passe</label>
-                                <input type="password" id="source_pass" name="source_pass" class="form-control" required>
-                            </div>
-                        </div>
-                        <!-- Colonne destination -->
-                        <div class="col-md-6">
-                            <h5>Serveur Destination</h5>
-                            <div class="mb-3">
-                                <label for="dest_server" class="form-label">Serveur IMAP</label>
-                                <input type="text" id="dest_server" name="dest_server" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="dest_user" class="form-label">Utilisateur</label>
-                                <input type="text" id="dest_user" name="dest_user" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="dest_pass" class="form-label">Mot de passe</label>
-                                <input type="password" id="dest_pass" name="dest_pass" class="form-control" required>
-                            </div>
-                        </div>
+        </form>
+
+        <!-- Custom Message Modal -->
+        <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header" id="modalHeader">
+                        <h5 class="modal-title" id="messageModalLabel">
+                            <i class="fas fa-info-circle me-2" id="modalIcon"></i>
+                            <span id="modalTitle">Message</span>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="d-flex justify-content-between mt-4">
-                        <button type="submit" class="btn btn-primary">Migrer les Emails</button>
-                        <button type="button" onclick="window.location.href='/results'" class="btn btn-secondary">Confirmer la Migration</button>
+                    <div class="modal-body">
+                        <div class="message-content" id="modalMessage"></div>
                     </div>
-                </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" id="copyMessageBtn">
+                            <i class="fas fa-copy me-2"></i>Copier le message
+                        </button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Init Tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+        // Auto-switch tab if requested
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get('active_tab');
+        if (activeTab) {
+            const tabEl = document.querySelector(`#${activeTab}-tab`);
+            if (tabEl) {
+                const tab = new bootstrap.Tab(tabEl);
+                tab.show();
+            }
+        }
+
+        // Mode Switching
+        function setMode(mode) {
+            document.getElementById('mode_input').value = mode;
+            document.querySelectorAll('.mode-switch-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-mode-' + mode).classList.add('active');
+
+            if (mode === 'batch') {
+                document.getElementById('single_mode_content').style.display = 'none';
+                document.getElementById('batch_mode_content').style.display = 'block';
+                // Disable required fields in single mode
+                document.querySelectorAll('#single_mode_content input[required]').forEach(el => el.removeAttribute('required'));
+            } else {
+                document.getElementById('single_mode_content').style.display = 'block';
+                document.getElementById('batch_mode_content').style.display = 'none';
+                // Re-enable required fields (simplified)
+                ['user1', 'user2'].forEach(id => document.getElementById(id).setAttribute('required', ''));
+            }
+            updatePreview();
+        }
+
+        // Presets
+        const presets = {
+            'gmail': { 'host1': 'imap.gmail.com', 'port1': '993', 'host2': 'imap.gmail.com', 'port2': '993' },
+            'office365': { 'host1': 'outlook.office365.com', 'port1': '993', 'host2': 'outlook.office365.com', 'port2': '993' },
+            'exchange': { 'port1': '993', 'port2': '993' },
+            'g_to_o': { 'host1': 'imap.gmail.com', 'port1': '993', 'host2': 'outlook.office365.com', 'port2': '993', 'automap': true }
+        };
+
+        document.getElementById('preset_selector').addEventListener('change', function () {
+            const val = this.value;
+            if (presets[val]) {
+                const p = presets[val];
+                if (p.host1) document.getElementById('host1').value = p.host1;
+                if (p.port1) document.getElementById('port1').value = p.port1;
+                if (p.host2) document.getElementById('host2').value = p.host2;
+                if (p.port2) document.getElementById('port2').value = p.port2;
+                if (p.automap) document.querySelector('input[name="automap"]').checked = true;
+                updatePreview();
+            }
+        });
+
+        // Custom Message Modal Functions
+        let messageModalInstance;
+        let currentMessageText = '';
+
+        function showMessage(message, type = 'info', title = null) {
+            const modal = document.getElementById('messageModal');
+            const modalHeader = document.getElementById('modalHeader');
+            const modalIcon = document.getElementById('modalIcon');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+
+            // Store message for copying
+            currentMessageText = message;
+
+            // Set icon and colors based on type
+            let iconClass = 'fa-info-circle';
+            let headerClass = 'bg-primary text-white';
+            let defaultTitle = 'Information';
+
+            if (type === 'success') {
+                iconClass = 'fa-check-circle';
+                headerClass = 'bg-success text-white';
+                defaultTitle = 'Succès';
+            } else if (type === 'error') {
+                iconClass = 'fa-exclamation-triangle';
+                headerClass = 'bg-danger text-white';
+                defaultTitle = 'Erreur';
+            } else if (type === 'warning') {
+                iconClass = 'fa-exclamation-circle';
+                headerClass = 'bg-warning text-dark';
+                defaultTitle = 'Attention';
+            }
+
+            // Update modal
+            modalIcon.className = `fas ${iconClass} me-2`;
+            modalTitle.textContent = title || defaultTitle;
+            modalHeader.className = `modal-header ${headerClass}`;
+
+            // Format message with line breaks
+            modalMessage.innerHTML = message.replace(/\n/g, '<br>');
+
+            // Show modal
+            if (!messageModalInstance) {
+                messageModalInstance = new bootstrap.Modal(modal);
+            }
+            messageModalInstance.show();
+        }
+
+        // Copy message to clipboard
+        document.getElementById('copyMessageBtn').addEventListener('click', function () {
+            navigator.clipboard.writeText(currentMessageText).then(() => {
+                const btn = this;
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check me-2"></i>Copié !';
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-success');
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-secondary');
+                }, 2000);
+            }).catch(err => {
+                console.error('Erreur lors de la copie:', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = currentMessageText;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    const btn = this;
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check me-2"></i>Copié !';
+                    btn.classList.remove('btn-outline-secondary');
+                    btn.classList.add('btn-success');
+
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                        btn.classList.remove('btn-success');
+                        btn.classList.add('btn-outline-secondary');
+                    }, 2000);
+                } catch (err) {
+                    alert('Impossible de copier le message');
+                }
+                document.body.removeChild(textArea);
+            });
+        });
+
+        // Toggle Password Visibility
+        function togglePassword(fieldId, button) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + '-icon');
+
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Test Connection
+        const testBtn = document.getElementById('testConnectionBtn');
+        testBtn.addEventListener('click', function () {
+            const originalText = testBtn.innerHTML;
+            testBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Test...';
+            testBtn.disabled = true;
+            const formData = new FormData(document.getElementById('syncForm'));
+            fetch('/test_connection', { method: 'POST', body: formData })
+                .then(r => r.json()).then(d => {
+                    // If auto-detection occurred, update the fields
+                    if (d.detected_settings) {
+                        if (d.detected_settings.host1) document.getElementById('host1').value = d.detected_settings.host1;
+                        if (d.detected_settings.port1) document.getElementById('port1').value = d.detected_settings.port1;
+                        if (d.detected_settings.host2) document.getElementById('host2').value = d.detected_settings.host2;
+                        if (d.detected_settings.port2) document.getElementById('port2').value = d.detected_settings.port2;
+                        updatePreview();
+                    }
+                    // Use custom modal instead of alert
+                    const messageType = d.status === 'success' ? 'success' : 'error';
+                    showMessage(d.message, messageType);
+                })
+                .catch(e => showMessage('Erreur de connexion au serveur: ' + e, 'error'))
+                .finally(() => { testBtn.innerHTML = originalText; testBtn.disabled = false; });
+        });
+
+
+        // CSV Download
+        window.downloadSampleCSV = function () {
+            const csv = "host1,user1,pass1,host2,user2,pass2\nimap.src.com,u1,p1,imap.dst.com,u1,p2\n";
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'template_batch.csv';
+            a.click();
+        }
+
+        // Preview
+        const form = document.getElementById('syncForm');
+        const preview = document.getElementById('commandPreview');
+
+        function updatePreview() {
+            if (document.getElementById('mode_input').value === 'batch') {
+                preview.textContent = "[Mode Batch] Commandes générées dynamiquement depuis le CSV.";
+                return;
+            }
+            let cmd = "imapsync";
+            const fd = new FormData(form);
+
+            // Helper to add value flags
+            const add = (k, v) => {
+                if (v && v.trim() !== "") {
+                    // Quote values if they contain spaces or special chars
+                    if (v.includes(" ") || v.includes("|") || v.includes("^") || v.includes("=")) {
+                        cmd += ` --${k} "${v}"`;
+                    } else {
+                        cmd += ` --${k} ${v}`;
+                    }
+                }
+            };
+
+            // Helper to add boolean flags
+            const addB = (k) => { if (form.querySelector(`[name="${k}"]`)?.checked) cmd += ` --${k}`; };
+
+            // Global
+            if (form.querySelector('[name="dry"]')?.checked) cmd += ' --dry';
+
+            // Host 1
+            add('host1', fd.get('host1'));
+            add('port1', fd.get('port1'));
+            add('user1', fd.get('user1'));
+            if (fd.get('password1')) cmd += ' --password1 ****';
+            if (fd.get('passfile1').name) cmd += ' --passfile1 <file>';
+            addB('ssl1');
+            add('authmech1', fd.get('authmech1'));
+            add('authuser1', fd.get('authuser1'));
+            add('oauthaccesstoken1', fd.get('oauthaccesstoken1'));
+
+            // Host 2
+            add('host2', fd.get('host2'));
+            add('port2', fd.get('port2'));
+            add('user2', fd.get('user2'));
+            if (fd.get('password2')) cmd += ' --password2 ****';
+            if (fd.get('passfile2').name) cmd += ' --passfile2 <file>';
+            addB('ssl2');
+            add('authmech2', fd.get('authmech2'));
+            add('authuser2', fd.get('authuser2'));
+            add('oauthaccesstoken2', fd.get('oauthaccesstoken2'));
+
+            // Folders
+            add('folder', fd.get('folder'));
+            add('include', fd.get('include'));
+            add('prefix1', fd.get('prefix1'));
+            add('prefix2', fd.get('prefix2'));
+            add('exclude', fd.get('exclude'));
+            add('f1f2', fd.get('f1f2'));
+            addB('automap');
+            addB('skipemptyfolders');
+            addB('folderrec');
+
+            // Filters
+            add('maxage', fd.get('maxage'));
+            add('minage', fd.get('minage'));
+            add('maxsize', fd.get('maxsize'));
+            add('search', fd.get('search'));
+            addB('skipmess');
+
+            // Performance
+            add('maxmessagespersecond', fd.get('maxmessagespersecond'));
+            add('maxbytespersecond', fd.get('maxbytespersecond'));
+            addB('usecache');
+            addB('useuid');
+            addB('nofoldersizes');
+
+            // Advanced
+            add('timeout1', fd.get('timeout1'));
+            add('timeout2', fd.get('timeout2'));
+            addB('synclabels');
+            addB('syncacls');
+            add('logfile', fd.get('logfile'));
+            addB('debug');
+
+            // Danger
+            addB('delete1');
+            addB('delete2');
+
+            preview.textContent = cmd;
+        }
+
+        form.addEventListener('change', updatePreview);
+        form.addEventListener('input', updatePreview);
+        updatePreview();
+    </script>
 </body>
+
 </html>

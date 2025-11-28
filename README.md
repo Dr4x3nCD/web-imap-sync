@@ -1,51 +1,186 @@
-# Titre du Projet : Mail Migration Tool
+# Web IMAP Sync | Ultimate Migration Tool
 
-## Description
-Mail Migration Tool est une application web conteneurisée conçue pour faciliter la migration d'emails entre deux serveurs IMAP, en s’appuyant sur l’outil `imapsync`. L'application permet aux utilisateurs de saisir les informations de connexion pour les serveurs source et destination et de déclencher la migration des emails en un seul clic. Une interface conviviale permet de suivre la progression de la migration en temps réel. 
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/levide229/mail_migration_tool)
+[![Python](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Ce projet vise à simplifier les migrations d'emails, notamment lors de changements d'hébergement ou de serveur, en rendant le processus accessible depuis une interface web sans configuration de fichiers en ligne de commande. 
+## 📋 Description
 
-## Fonctionnalités
-- Saisie des informations de connexion aux serveurs source et destination via une interface web.
-- Lancement de la migration IMAP des emails avec un suivi en direct des logs de migration.
-- Architecture conteneurisée, permettant de déployer l'application facilement.
-- Gestion multi-utilisateur pour permettre à plusieurs personnes d'accéder à l'outil depuis différents hôtes simultanément.
-  
-## Prérequis
-- **Docker** : L'application est conçue pour être déployée dans un conteneur Docker.
-- **Python 3.9+** : Utilisé pour le backend de l'application.
-- **Perl et imapsync** : `imapsync` est utilisé pour effectuer la migration des emails, avec plusieurs modules Perl requis pour son bon fonctionnement.
+**Web IMAP Sync** est une application web moderne et intuitive pour la migration d'emails entre serveurs IMAP. Basée sur l'outil robuste `imapsync`, elle offre une interface utilisateur premium avec des fonctionnalités avancées pour simplifier les migrations d'emails.
 
-## Installation
-1. **Cloner le dépôt** sur votre machine locale :
-   ```bash
-   git clone https://github.com/Tob229/mail_migration_tool.git
-   cd mail_migration_tool
-   ```
+### ✨ Fonctionnalités Principales
 
-2. **Construire l’image Docker** :
-   ```bash
-   docker build -t mail_migration_tool .
-   ```
+- 🎯 **Interface Moderne** : Design premium avec Bootstrap 5 et animations fluides
+- 🔐 **Test de Connexion Intelligent** : Validation indépendante de chaque serveur avec feedback détaillé
+- 🚀 **Auto-détection IMAP** : Détection automatique des paramètres pour Gmail, Office365, Yahoo, etc.
+- 👁️ **Visibilité des Mots de Passe** : Icône œil pour afficher/masquer les mots de passe
+- 📋 **Messages Copiables** : Modal personnalisé avec copie dans le presse-papiers
+- 🔄 **Mode Batch** : Migration de plusieurs comptes via fichier CSV
+- 👻 **Mode Arrière-plan** : Lancement de tâches en arrière-plan avec suivi via code secret
+- 📊 **Suivi en Temps Réel** : Logs de migration en streaming
+- 🛠️ **Configuration Avancée** : Support complet des options imapsync (filtres, préfixes, OAuth, etc.)
+- 🎨 **Aperçu de Commande** : Visualisation de la commande imapsync générée
 
-3. **Exécuter l’image Docker** en exposant le port 5000 :
-   ```bash
-   docker run -p 5000:5000 mail_migration_tool
-   ```
-4. **Ou vous téléchargez l'image depuis le docker hub** :
-   ```bash
-   docker pull levide229/mail_migration_tool:latest
-   ```
+## 🚀 Démarrage Rapide
 
-## Utilisation
-1. **Accéder à l’interface** : Rendez-vous sur `http://<IP_du_serveur>:5000` dans un navigateur.
-2. **Saisir les informations de connexion** : Entrez les identifiants du serveur IMAP source et de destination.
-3. **Lancer la migration** : Cliquez sur “Migrer les emails” pour démarrer la migration. Vous pouvez suivre le journal en direct pour voir la progression.
-4. **Confirmation** : Un message de confirmation s'affiche une fois la migration terminée.
+### Option 1 : Docker Hub (Recommandé)
 
-## Contribuer
-Les contributions sont les bienvenues. Veuillez ouvrir une *issue* ou soumettre une *pull request* avec vos améliorations ou suggestions.
+```bash
+# Télécharger l'image
+docker pull levide229/mail_migration_tool:latest
 
-## Licence
-Ce projet est sous licence MIT. Vous êtes libre de l’utiliser, de le modifier et de le distribuer sous les conditions de la licence.
+# Lancer le conteneur
+docker run -d -p 5000:5000 --name web-imap-sync levide229/mail_migration_tool:latest
+```
 
+### Option 2 : Build Local
+
+```bash
+# Cloner le dépôt
+git clone https://github.com/Dr4x3nCD/web-imap-sync.git
+cd web-imap-sync
+
+# Construire l'image
+docker build -t web-imap-sync .
+
+# Lancer le conteneur
+docker run -d -p 5000:5000 --name web-imap-sync web-imap-sync
+```
+
+### Option 3 : Développement Local
+
+```bash
+# Installer les dépendances
+pip install -r requirements.txt
+
+# Lancer l'application
+python app.py
+```
+
+## 📖 Utilisation
+
+1. **Accéder à l'interface** : Ouvrez `http://localhost:5000` dans votre navigateur
+
+2. **Configurer la connexion** :
+   - Remplissez les informations du serveur source (Host1)
+   - Remplissez les informations du serveur destination (Host2)
+   - Utilisez l'auto-détection en laissant le champ "Host" vide
+
+3. **Tester la connexion** :
+   - Cliquez sur "Tester la connexion"
+   - Vérifiez que les deux serveurs sont accessibles
+   - Les erreurs sont maintenant copiables pour faciliter le débogage
+
+4. **Configurer les options** (optionnel) :
+   - **Dossiers** : Filtres, préfixes, mapping
+   - **Filtres & Règles** : Age, taille, recherche IMAP
+   - **Performance** : Limitation de vitesse, cache
+   - **Avancé** : Timeouts, labels, ACLs
+   - **Zone Danger** : Suppressions (attention !)
+
+5. **Lancer la migration** :
+   - Mode normal : Suivi en temps réel
+   - Mode arrière-plan : Récupération via code secret
+
+## 🎨 Captures d'Écran
+
+L'interface propose :
+- Design moderne avec glassmorphism
+- Onglets organisés par catégorie
+- Tooltips informatifs sur chaque champ
+- Prévisualisation de la commande imapsync
+- Modal personnalisé pour les messages d'erreur
+
+## 🔧 Configuration Avancée
+
+### Variables d'Environnement
+
+```bash
+# Secret key pour les sessions (recommandé en production)
+FLASK_SECRET_KEY=your-secret-key-here
+
+# Dossier de téléchargement
+UPLOAD_FOLDER=/tmp/imapsync_uploads
+```
+
+### Pré-configurations Disponibles
+
+- Gmail ➔ Gmail
+- Office 365 ➔ Office 365
+- Exchange ➔ Exchange
+- Gmail ➔ Office 365
+
+## 🐛 Dépannage
+
+### Erreur d'authentification
+
+Si vous obtenez une erreur d'authentification :
+1. Vérifiez vos identifiants dans le webmail
+2. Vérifiez si vous utilisez un mot de passe d'application
+3. Utilisez le test de connexion pour identifier quel serveur échoue
+4. Copiez le message d'erreur pour analyse
+
+### Problème de préfixes
+
+Si aucun dossier n'est synchronisé :
+- Vérifiez les préfixes suggérés dans les logs
+- Utilisez l'onglet "Dossiers" pour configurer les préfixes
+- Consultez l'analyse automatique des erreurs
+
+## 📦 Structure du Projet
+
+```
+web-imap-sync/
+├── app.py                 # Application Flask principale
+├── templates/
+│   ├── index.html        # Interface principale
+│   ├── results.html      # Page de résultats
+│   ├── track.html        # Suivi de tâche
+│   └── task_started.html # Confirmation mode arrière-plan
+├── static/
+│   └── style.css         # Styles personnalisés
+├── Dockerfile            # Configuration Docker
+├── requirements.txt      # Dépendances Python
+└── imapsync             # Binaire imapsync
+```
+
+## 🛠️ Technologies Utilisées
+
+- **Backend** : Flask (Python 3.9+)
+- **Frontend** : Bootstrap 5, Font Awesome, JavaScript ES6
+- **Migration** : imapsync (Perl)
+- **Conteneurisation** : Docker
+
+## 📝 Prérequis
+
+- **Docker** : Pour le déploiement conteneurisé
+- **Python 3.9+** : Pour l'exécution locale
+- **Perl et modules** : Requis par imapsync (inclus dans Docker)
+
+## 🤝 Contribuer
+
+Les contributions sont les bienvenues ! N'hésitez pas à :
+- Ouvrir une issue pour signaler un bug
+- Proposer une pull request pour une amélioration
+- Suggérer de nouvelles fonctionnalités
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Vous êtes libre de l'utiliser, le modifier et le distribuer.
+
+## 🙏 Remerciements
+
+- [imapsync](https://imapsync.lamiral.info/) par Gilles LAMIRAL
+- [Bootstrap](https://getbootstrap.com/)
+- [Font Awesome](https://fontawesome.com/)
+
+## 📞 Support
+
+Pour toute question ou problème :
+- Ouvrez une issue sur GitHub
+- Consultez la documentation d'imapsync
+- Utilisez la fonction "Copier le message" pour partager les erreurs
+
+---
+
+**Fait avec ❤️ pour simplifier les migrations d'emails**
